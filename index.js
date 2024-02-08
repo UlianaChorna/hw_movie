@@ -37,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "badge bg-secondary badge bg-primary rounded-pill";
     addMovieButton.addEventListener("click", () => {
       window.history.pushState(null, "", window.location.pathname + "#add");
-      console.log(window.location.href);
       renderMovieList();
       addMovieForm();
     });
