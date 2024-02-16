@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let movies = JSON.parse(localStorage.getItem("movies")) || [...initialFilms];
   const initialMovies = [...movies];
-
+  
   const renderMovie = (movie) => {
     const movieElement = document.createElement("ul");
     movieElement.className = "list-group";
@@ -106,6 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const index = movies.findIndex((m) => m.id === movie.id);
         movies[index] = updatedMovie;
+        const initialIndex = initialMovies.findIndex((m) => m.id === movie.id);
+        if (initialIndex !== -1) {
+          initialMovies[initialIndex] = updatedMovie;
+        }
+        alert("Are you sure you want to edit the movie?")
         renderMoviePreview(updatedMovie);
         handleNavigation();
       } else if (target.id === "btn-cancel") {
@@ -119,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const addMovieForm = () => {
-    // window.history.pushState(null, "", window.location.pathname + '#add');
     const formElement = document.createElement("form");
     formElement.innerHTML = `
         <div class="input-group input-group-sm mb-3" style="margin-top:60px">
@@ -156,10 +160,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         window.history.pushState(null, "", `?id=${newMovie.id}#preview`);
         movies.push(newMovie);
+        initialMovies.push(newMovie);
         clearInput();
-        renderMovieList(movies);
+        handleNavigation();
+        renderMovieList(newMovie);
+      
         localStorage.setItem("movies", JSON.stringify(movies));
         renderMoviePreview(newMovie);
+      
       } else if (target.id === "btn-cancel") {
         window.location.hash = "";
         formElement.innerHTML = "";
@@ -190,34 +198,27 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const handleNavigation = () => {
-
-    const params = new URLSearchParams(window.location.search);
-    const movieId = params.get("id");
+    const queryString = window.location.search;
     const hash = window.location.hash;
+    const urlParams = new URLSearchParams(queryString);
+    const id = urlParams.get("id");
 
-    if (movieId) {
-      renderMovieList();
-      renderMovieDetails(movieId);
-    } else if (hash === "#add") {
-      console.log("Add movie page");
-      renderMovieList();
-      addMovieForm();
-    } else if (hash === "#edit") {
-      console.log("Edit movie page");
-      const movieId = params.get("id");
-      if (movieId) {
-        renderMovieList();
-        const targetMovie = movies.find((m) => m.id == movieId);
+    if (id) {
+      if (hash === "#preview") {
+        renderMovieList(movies);
+        renderMovieDetails(id);
+      } else if (hash === "#edit") {
+        const targetMovie = movies.find((m) => m.id == id);
         if (targetMovie) {
           renderEditMovieForm(targetMovie);
         } else {
-          console.log("Movie not found");
+          alert("Movie not found");
         }
-      } else {
-        console.log("Movie ID not provided");
       }
+    } else if (hash === "#add") {
+      renderMovieList();
+      addMovieForm();
     } else {
-      console.log("Default page");
       renderMovieList();
     }
   };
